@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Register.css'; 
+import './Register.css';
 
 function Register() {
   const [formData, setFormData] = useState({
@@ -12,14 +12,35 @@ function Register() {
     address: '',
   });
 
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
   const handleChange = (e) => {
     setFormData({...formData, [e.target.name]: e.target.value });
   };
 
-  const handleRegister = (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
-    alert(`Mock registration for ${formData.username} (${formData.email})`);
-    
+    setError('');
+    setSuccess('');
+
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Registration failed');
+      }
+
+      setSuccess('User registered successfully! You can now log in.');
+    } catch (err) {
+      setError(err.message);
+    }
   };
 
   return (
@@ -27,6 +48,9 @@ function Register() {
       <div className="register-form-wrapper">
         <form onSubmit={handleRegister} className="register-form">
           <h2 className="form-title">Create Your Account</h2>
+
+          {error && <p style={{ color: 'red' }}>{error}</p>}
+          {success && <p style={{ color: 'green' }}>{success}</p>}
 
           <input
             type="text"
@@ -37,7 +61,6 @@ function Register() {
             required
             className="input-field"
           />
-
           <input
             type="email"
             name="email"
@@ -47,7 +70,6 @@ function Register() {
             required
             className="input-field"
           />
-
           <input
             type="password"
             name="password"
@@ -57,7 +79,6 @@ function Register() {
             required
             className="input-field"
           />
-
           <input
             type="tel"
             name="phone"
@@ -66,7 +87,6 @@ function Register() {
             onChange={handleChange}
             className="input-field"
           />
-
           <input
             type="number"
             name="age"
@@ -77,7 +97,6 @@ function Register() {
             onChange={handleChange}
             className="input-field"
           />
-
           <select
             name="gender"
             value={formData.gender}
@@ -91,7 +110,6 @@ function Register() {
             <option value="other">Other</option>
             <option value="prefer_not_say">Prefer not to say</option>
           </select>
-
           <textarea
             name="address"
             placeholder="Address"
